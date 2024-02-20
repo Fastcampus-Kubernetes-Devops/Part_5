@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: slack-config
+type: Opaque
+data:
+  url: "ENCODED_SLACK_URL"
+---
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: alertmanager-config
+spec:
+  route:
+    groupWait: 10s
+    groupInterval: 10s
+    repeatInterval: 10s
+    receiver: 'slack'
+    groupBy:
+     - alertname
+    routes:
+     - receiver: 'null'
+       matchers:
+        - name: alertname
+          matchType: '=~'
+          value: "^(Kube.*|Watchdog)$"
+  receivers:
+   - name: 'null'
+   - name: 'slack'
+     slackConfigs:
+      - apiURL:
+         name: slack-config
+         key: url

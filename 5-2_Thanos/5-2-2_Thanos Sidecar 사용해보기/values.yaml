@@ -1,0 +1,32 @@
+prometheus:
+  service:
+    type: "LoadBalancer"
+  prometheusSpec:
+    thanos:
+      objectStorageConfig:
+        secret:
+          type: "S3"
+          config:
+            endpoint: "s3.ap-northeast-2.amazonaws.com"
+            bucket: "BUCKET_NAME"
+    externalLabels:
+      environment: "demo"
+    containers:
+      - name: prometheus
+        args:
+          - --config.file=/etc/prometheus/config_out/prometheus.env.yaml                                                          
+          - --web.enable-lifecycle                                                                                                
+          - --web.enable-admin-api
+          - --storage.tsdb.path=/prometheus
+          - --storage.tsdb.retention.time=10m
+          - --storage.tsdb.max-block-duration=1m
+          - --storage.tsdb.min-block-duration=1m
+  thanosService:
+    enabled: true
+    type: "LoadBalancer"
+    clusterIP: ""
+grafana:
+  service:
+    type: "LoadBalancer"
+  adminUser: admin
+  adminPassword: admin

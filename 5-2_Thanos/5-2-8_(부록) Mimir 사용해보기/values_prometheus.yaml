@@ -1,0 +1,23 @@
+prometheus:
+  service:
+    type: "LoadBalancer"
+  prometheusSpec:
+    externalLabels:
+      environment: "demo"
+    containers:
+      - name: prometheus
+        args:
+          - --config.file=/etc/prometheus/config_out/prometheus.env.yaml                                                          
+          - --web.enable-lifecycle                                                                                                
+          - --web.enable-admin-api
+          - --storage.tsdb.path=/prometheus
+          - --storage.tsdb.retention.time=4h
+          - --storage.tsdb.max-block-duration=1h
+          - --storage.tsdb.min-block-duration=1h 
+    remoteWrite:
+      - url: http://mimir-distributor:8080/api/v1/push
+grafana:
+  service:
+    type: "LoadBalancer"
+  adminUser: admin
+  adminPassword: admin

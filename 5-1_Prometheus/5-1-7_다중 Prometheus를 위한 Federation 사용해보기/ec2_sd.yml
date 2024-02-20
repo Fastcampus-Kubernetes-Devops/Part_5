@@ -1,0 +1,12 @@
+global:
+  external_labels:
+    environment: dev
+scrape_configs:
+- job_name: "node_exporter"
+  ec2_sd_configs:
+  - region: 'ap-northeast-2'
+    port: 9100
+    filters:
+      - name: tag:Monitoring
+        values:
+          - true

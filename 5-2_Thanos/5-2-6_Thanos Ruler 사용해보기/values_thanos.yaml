@@ -1,0 +1,73 @@
+objstoreConfig:
+  type: "S3"
+  config:
+    endpoint: "s3.ap-northeast-2.amazonaws.com"
+    bucket: "BUCKET_NAME"
+query:
+  enabled: true
+  logLevel: "debug"
+  service:
+    type: "LoadBalancer"
+  stores:
+    - "monitoring-kube-prometheus-thanos-discovery:10901"
+queryFrontend:
+  enabled: true
+  service:
+    type: "LoadBalancer"
+  args:
+    - query-frontend                                                                                                        
+    - --log.level=info                                                                                                      
+    - --log.format=logfmt                                                                                                   
+    - --http-address=0.0.0.0:10902                                                                                          
+    - --query-frontend.downstream-url=http://thanos-query:9090  
+    - |-
+      --query-range.response-cache-config="config":
+        "max_size": "1024KB"
+        "max_size_items": 0
+        "validity": "30s"
+      "type": "in-memory"
+compactor:
+  enabled: true
+  service:
+    type: "LoadBalancer"
+storegateway:
+  enabled: true
+  service:
+    type: "LoadBalancer"
+  args:
+    - store                                                                                                
+    - --log.level=info                                                                                     
+    - --log.format=logfmt                                                                                  
+    - --grpc-address=0.0.0.0:10901                                                                         
+    - --http-address=0.0.0.0:10902                                                                         
+    - --data-dir=/data                                                                                     
+    - --objstore.config-file=/conf/objstore.yml  
+    - |-
+      --store.caching-bucket.config="config":
+        "max_item_size": "1024KB"
+      "type": "in-memory"
+ruler:
+  enabled: true
+  service:
+    type: "LoadBalancer"
+  alertmanagers:
+    url: http://monitoring-kube-prometheus-alertmanager:9093
+  config: |-
+    groups:
+      - name: example
+        rules:
+          - alert: Down
+            expr: up == 0
+            for: 5s
+
+
+
+
+
+
+
+
+
+
+
+

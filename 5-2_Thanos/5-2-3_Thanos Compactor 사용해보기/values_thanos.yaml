@@ -1,0 +1,13 @@
+objstoreConfig:
+  type: "S3"
+  config:
+    endpoint: "s3.ap-northeast-2.amazonaws.com"
+    bucket: "BUCKET_NAME"
+query:
+  enabled: false
+queryFrontend:
+  enabled: false
+compactor:
+  enabled: true
+  service:
+   type: "LoadBalancer"

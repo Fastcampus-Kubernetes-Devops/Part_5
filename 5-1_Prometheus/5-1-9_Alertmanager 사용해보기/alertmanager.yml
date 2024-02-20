@@ -1,0 +1,7 @@
+route:
+  group_by: ['alertname']
+  receiver: 'oncall'
+receivers:
+  - name: 'oncall'
+    slack_configs:
+      - api_url: 

@@ -1,0 +1,31 @@
+objstoreConfig:
+  type: "S3"
+  config:
+    endpoint: "s3.ap-northeast-2.amazonaws.com"
+    bucket: "BUCKET_NAME"
+query:
+  enabled: true
+  service:
+   type: "LoadBalancer"
+queryFrontend:
+  enabled: false
+compactor:
+  enabled: true
+  service:
+   type: "LoadBalancer"
+storegateway:
+  enabled: true
+  service:
+    type: "LoadBalancer"
+  args:
+    - store                                                                                                
+    - --log.level=info                                                                                     
+    - --log.format=logfmt                                                                                  
+    - --grpc-address=0.0.0.0:10901                                                                         
+    - --http-address=0.0.0.0:10902                                                                         
+    - --data-dir=/data                                                                                     
+    - --objstore.config-file=/conf/objstore.yml  
+    - |-
+      --store.caching-bucket.config="config":
+        "max_item_size": "1024KB"
+      "type": "in-memory"

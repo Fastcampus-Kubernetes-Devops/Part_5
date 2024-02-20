@@ -1,0 +1,20 @@
+objstoreConfig:
+  type: "S3"
+  config:
+    endpoint: "s3.ap-northeast-2.amazonaws.com"
+    bucket: "BUCKET_NAME"
+query:
+  enabled: true
+  logLevel: "debug"
+  service:
+    type: "LoadBalancer"
+  stores:
+    - "thanos-receive:10902"
+queryFrontend:
+  enabled: false
+compactor:
+  enabled: false
+storegateway:
+  enabled: false
+receive:
+  enabled: true
