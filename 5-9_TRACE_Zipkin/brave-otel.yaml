@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brave-otel-frontend
+  labels:
+    app: brave-otel-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: brave-otel-frontend
+  template:
+    metadata:
+      labels:
+        app: brave-otel-frontend
+    spec:
+      containers:
+      - name: brave-otel-frontend
+        image: ghcr.io/openzipkin/brave-example:armeria
+        command:
+          - "start-frontend"
+        ports: 
+        - containerPort: 8081
+        env:
+        - name: ZIPKIN_BASEURL
+          value: http://zipkin.zipkin.svc.cluster.local:9411
+        - name: BACKEND_ENDPOINT
+          value: http://brave-otel-backend:9000/api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brave-otel-backend
+  labels:
+    app: brave-otel-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: brave-otel-backend
+  template:
+    metadata:
+      labels:
+        app: brave-otel-backend
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+    spec:
+      containers:
+      - name: brave-otel-backend
+        image: ghcr.io/openzipkin/brave-example:armeria
+        command:
+          - "start-backend"
+        ports: 
+        - containerPort: 9000
+        env:
+        - name: ZIPKIN_BASEURL
+          value: http://zipkin.zipkin.svc.cluster.local:9411
+        - name: BACKEND_ENDPOINT
+          value: http://brave-otel-backend:9000/api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: brave-otel-frontend
+  name: brave-otel-frontend
+spec:
+  selector:
+    app: brave-otel-frontend
+  ports:
+    - name: brave-otel-frontend
+      protocol: TCP
+      port: 8081
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: brave-otel-backend
+  name: brave-otel-backend
+spec:
+  selector:
+    app: brave-otel-backend
+  ports:
+    - name: brave-otel-backend
+      protocol: TCP
+      port: 9000
+

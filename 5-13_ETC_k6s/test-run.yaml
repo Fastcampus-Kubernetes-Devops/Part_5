@@ -1,0 +1,11 @@
+apiVersion: k6.io/v1alpha1
+kind: TestRun
+metadata:
+  name: run-k6-otel-demo
+  namespace: k6
+spec:
+  parallelism: 1
+  script:
+    configMap:
+      name: otel-test
+      file: test.js

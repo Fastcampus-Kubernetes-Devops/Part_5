@@ -1,0 +1,129 @@
+# Default values for ngrinder.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+ngrinder_agent:
+ image:
+  repository: ngrinder/agent
+  pullPolicy: Always
+  tag: "3.5.9"
+ replicaCount: 5
+ args: ngrinder.ngrinder.svc.cluster.local:80
+ selectorLabels:
+  app.kubernetes.io/type: agent
+
+ngrinder:
+ image: 
+  repository: ngrinder/controller
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "3.5.9"
+ replicaCount: 1
+ deployment:
+  ports: [
+       {containerPort: 80, protocol: TCP},
+       {containerPort: 16001, protocol: TCP},
+       {containerPort: 12000, protocol: TCP},
+       {containerPort: 12001, protocol: TCP},
+       {containerPort: 12002, protocol: TCP},
+       {containerPort: 12003, protocol: TCP},
+       {containerPort: 12004, protocol: TCP},
+       {containerPort: 12005, protocol: TCP},
+       {containerPort: 12006, protocol: TCP},
+       {containerPort: 12007, protocol: TCP},
+       {containerPort: 12008, protocol: TCP},
+       {containerPort: 12009, protocol: TCP}
+  ]
+ service:
+  type: ClusterIP
+  ports: [
+      {name: http80, port: 80, protocol: TCP, targetPort: 80},
+      {name: tcp16001, port: 16001, protocol: TCP, targetPort: 16001},
+      {name: tcp12000, port: 12000, protocol: TCP, targetPort: 12000},
+      {name: tcp12001, port: 12001, protocol: TCP, targetPort: 12001},
+      {name: tcp12002, port: 12002, protocol: TCP, targetPort: 12002},
+      {name: tcp12003, port: 12003, protocol: TCP, targetPort: 12003},
+      {name: tcp12004, port: 12004, protocol: TCP, targetPort: 12004},
+      {name: tcp12005, port: 12005, protocol: TCP, targetPort: 12005},
+      {name: tcp12006, port: 12006, protocol: TCP, targetPort: 12006},
+      {name: tcp12007, port: 12007, protocol: TCP, targetPort: 12007},
+      {name: tcp12008, port: 12008, protocol: TCP, targetPort: 12008},
+      {name: tcp12009, port: 12009, protocol: TCP, targetPort: 12009}
+  ]
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+
+ingress:
+  enabled: false
+  className: "nginx"
+  host: ngrind-controller.example.com
+  annotations: 
+    kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+    nginx.ingress.kubernetes.io/session-cookie-name: route
+  hosts:
+    - host: ngrind-controller.example.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: 
+      enabled: false
+      hosts:
+      - hosts: ngrind-controller.example.com
+      secretName: ngrind-tls
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+service:
+  type: ClusterIP
+  

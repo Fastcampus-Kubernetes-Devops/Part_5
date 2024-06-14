@@ -1,0 +1,11 @@
+extraEnvs:
+  - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+    value: Fastcampus12#$
+
+config:
+  opensearch.yml: |
+    plugins:
+      security:
+        ssl:
+          http:
+            enabled: false
