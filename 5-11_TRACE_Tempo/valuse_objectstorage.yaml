@@ -1,0 +1,22 @@
+hostNetwork: true
+traces:
+  jaegaer:
+    grpc:
+      enabled: true
+    thriftHttp:
+      enabled: true
+  zipkin:
+    enabled: true
+  otlp:
+    http:
+      enabled: true
+    grpc:
+      enabled: true
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: fast-tempo-bucket
+      endpoint: s3.ap-northeast-2.amazonaws.com
+      access_key: XXXXXXXXXXX
+      secret_key: XXXXXXXXXXXXXXXXXXXXXX

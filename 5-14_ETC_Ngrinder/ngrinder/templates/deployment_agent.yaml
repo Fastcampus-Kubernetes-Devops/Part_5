@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ngrinder.fullname" . }}-agent
+  labels:
+    {{- include "ngrinder.labels" . | nindent 4 }}
+    {{- with .Values.ngrinder_agent.selectorLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.ngrinder_agent.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ngrinder.selectorLabels" . | nindent 6 }}-agent
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ngrinder.selectorLabels" . | nindent 8 }}-agent
+        {{- with .Values.ngrinder_agent.selectorLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ngrinder.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      dnsPolicy: ClusterFirst
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.ngrinder_agent.image.repository }}:{{ .Values.ngrinder_agent.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.ngrinder_agent.image.pullPolicy }}
+          args: [{{ .Values.ngrinder_agent.args }} ]
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ngrinder.fullname" . }}
+  labels:
+    {{- include "ngrinder.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.ngrinder.service.type }}
+  {{- with .Values.ngrinder.service.ports }}
+  ports:
+    {{- toYaml . | nindent 4 }}
+  {{- end}}
+  selector:
+    {{- include "ngrinder.selectorLabels" . | nindent 4 }}

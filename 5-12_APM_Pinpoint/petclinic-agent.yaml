@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic
+  namespace: pinpoint-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: petclinic
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: petclinic
+    spec:
+      volumes:
+        - name: pinpoint-agent-volume
+          emptyDir: {}
+      initContainers:
+        - name: pinpoint-agent-initializer
+          image: pinpointdocker/pinpoint-agent:2.5.4
+          env:
+            - name: PROFILER_TRANSPORT_MODULE
+              value: GRPC
+            - name: COLLECTOR_IP
+              value: pinpoint-pinpoint-collector.pinpoint.svc.cluster.local
+            - name: PROFILER_TRANSPORT_AGENT_COLLECTOR_PORT
+              value: '9991'
+            - name: PROFILER_TRANSPORT_METADATA_COLLECTOR_PORT
+              value: '9991'
+            - name: PROFILER_TRANSPORT_STAT_COLLECTOR_PORT
+              value: '9992'
+            - name: PROFILER_TRANSPORT_SPAN_COLLECTOR_PORT
+              value: '9993'
+            - name: COLLECTOR_STAT_PORT
+              value: '9995'
+            - name: COLLECTOR_SPAN_PORT
+              value: '9996'
+            - name: COLLECTOR_TCP_PORT
+              value: '9994'
+            - name: DEBUG_LEVEL
+              value: INFO
+            - name: PROFILER_SAMPLING_NEW_THROUGHPUT
+              value: '0'
+            - name: PROFILER_SAMPLING_CONTINUE_THROUGHPUT
+              value: '0'
+          command: ['sh', '-c', "/usr/local/bin/configure-agent.sh &&  cp -r /pinpoint-agent/* /apm-agent"]
+          volumeMounts:
+            - name: pinpoint-agent-volume
+              mountPath: /apm-agent
+      containers:
+        - name: petclinic
+          image: springcommunity/spring-framework-petclinic:latest
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: >
+                -javaagent:/apm-agent/pinpoint-bootstrap-2.5.4.jar
+                -Dpinpoint.applicationName=petclinic
+                -Dpinpoint.agentId=petclinic
+                -Dpinpoint.profiler.profiles.active=release
+          resources: {}
+          volumeMounts:
+            - name: pinpoint-agent-volume
+              mountPath: /apm-agent
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinic
+  namespace: pinpoint-demo
+  labels:
+    app: petclinic
+spec:
+  ports:
+    - name: petclinic
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: petclinic
+  type: ClusterIP
+

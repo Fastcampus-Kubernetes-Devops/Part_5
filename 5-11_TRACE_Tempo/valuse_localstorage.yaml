@@ -1,0 +1,14 @@
+hostNetwork: true
+traces:
+  jaegaer:
+    grpc:
+      enabled: true
+    thriftHttp:
+      enabled: true
+  zipkin:
+    enabled: true
+  otlp:
+    http:
+      enabled: true
+    grpc:
+      enabled: true

@@ -1,0 +1,19 @@
+loki:
+  auth_enabled: false
+  storage:
+    bucketNames:
+      chunks: fastcampus-loki-part5
+      ruler: fastcampus-loki-part5
+      admin: fastcampus-loki-part5
+    type: s3
+    s3:
+      s3: s3://$AccessKey:$SecretKey@ap-northeast-2/fastcampus-loki-part5
+      signatureVersion: null
+      s3ForcePathStyle: false
+      insecure: true
+      http_config:
+        idle_conn_timeout: 90s
+        response_header_timeout: 0s
+        insecure_skip_verify: true
+      backoff_config: {}
+

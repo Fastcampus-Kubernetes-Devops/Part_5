@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ngrinder.fullname" . }}
+  labels:
+    {{- include "ngrinder.labels" . | nindent 4 }}
+    {{- with .Values.ngrinder.selectorLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.ngrinder.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ngrinder.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ngrinder.selectorLabels" . | nindent 8 }}
+        {{- with .Values.ngrinder.selectorLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ngrinder.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.ngrinder.image.repository }}:{{ .Values.ngrinder.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.ngrinder.image.pullPolicy }}
+          {{- with .Values.ngrinder.deployment.ports }}
+          ports:          
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: ngrinder-controller-data
+              mountPath: /opts/ngrinder-controller
+      volumes:
+      - name: ngrinder-controller-data
+        emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

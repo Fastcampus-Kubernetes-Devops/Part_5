@@ -1,0 +1,15 @@
+config:
+  outputs: |
+    [OUTPUT]
+        Name opensearch
+        Match kube.*
+        Host opensearch-cluster-master.opensearch.svc.cluster.local
+        Logstash_Format On
+        Logstash_Prefix kube_container
+        Retry_Limit False
+        Port 9200
+        Suppress_Type_Name On
+        HTTP_User admin
+        HTTP_Passwd Fastcampus12#$
+        tls On
+        tls.verify Off

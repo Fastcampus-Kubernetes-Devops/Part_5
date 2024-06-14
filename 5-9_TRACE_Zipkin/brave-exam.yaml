@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brave-frontend
+  labels:
+    app: brave-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: brave-frontend
+  template:
+    metadata:
+      labels:
+        app: brave-frontend
+    spec:
+      containers:
+      - name: brave-frontend
+        image: ghcr.io/openzipkin/brave-example:armeria
+        command:
+          - "start-frontend"
+        ports: 
+        - containerPort: 8081
+        env:
+        - name: ZIPKIN_BASEURL
+          value: http://zipkin.zipkin.svc.cluster.local:9411
+        - name: BACKEND_ENDPOINT
+          value: http://brave-backend:9000/api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brave-backend
+  labels:
+    app: brave-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: brave-backend
+  template:
+    metadata:
+      labels:
+        app: brave-backend
+    spec:
+      containers:
+      - name: brave-backend
+        image: ghcr.io/openzipkin/brave-example:armeria
+        command:
+          - "start-backend"
+        ports: 
+        - containerPort: 9000
+        env:
+        - name: ZIPKIN_BASEURL
+          value: http://zipkin.zipkin.svc.cluster.local:9411
+        - name: BACKEND_ENDPOINT
+          value: http://brave-backend:9000/api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: brave-frontend
+  name: brave-frontend
+spec:
+  selector:
+    app: brave-frontend
+  ports:
+    - name: brave-frontend
+      protocol: TCP
+      port: 8081
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: brave-backend
+  name: brave-backend
+spec:
+  selector:
+    app: brave-backend
+  ports:
+    - name: brave-backend
+      protocol: TCP
+      port: 9000
+

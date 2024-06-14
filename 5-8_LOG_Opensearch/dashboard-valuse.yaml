@@ -1,0 +1,11 @@
+config:
+  opensearch_dashboards.yml: |
+     server:
+       name: dashboards
+       host: 0.0.0.0
+     opensearch:
+       ssl:
+         verificationMode: none
+       hosts: ["https://opensearch-cluster-master:9200"]
+       username: "admin"
+       password: "Fastcampus12#$"
